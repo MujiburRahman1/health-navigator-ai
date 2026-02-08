@@ -86,7 +86,19 @@ export function ResponseDisplay({
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  // Clean markdown formatting from response
+  const cleanResponse = (text: string): string => {
+    return text
+      .replace(/###\s*/g, "")  // Remove ### headers
+      .replace(/\*\*\*/g, "")   // Remove *** bold/italic
+      .replace(/\*\*/g, "")     // Remove ** bold
+      .replace(/\n\s*\n/g, "\n\n") // Normalize multiple newlines
+      .trim();
+  };
+
   if (!response) return null;
+
+  const formattedResponse = cleanResponse(response);
 
   return (
     <Card className="p-6 animate-fade-in">
@@ -180,7 +192,7 @@ export function ResponseDisplay({
           <span className="text-xs text-muted-foreground font-medium">Response</span>
         </div>
         <div className="text-foreground leading-relaxed whitespace-pre-wrap pl-6">
-          {response}
+          {formattedResponse}
         </div>
       </div>
     </Card>
