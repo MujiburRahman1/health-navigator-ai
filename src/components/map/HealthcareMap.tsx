@@ -16,8 +16,8 @@ interface HealthcareMapProps {
   className?: string;
 }
 
-// Create custom marker icons
-const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"]) => {
+// Create custom marker icons with name labels
+const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"], name: string) => {
   const colors = {
     operational: "#22c55e",
     limited: "#f59e0b",
@@ -27,28 +27,47 @@ const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"]) 
 
   const bgColor = colors[status];
   const size = type === "hospital" ? 32 : 24;
+  
+  // Truncate name for display
+  const displayName = name.length > 20 ? name.substring(0, 18) + "..." : name;
 
   return new DivIcon({
-    className: "custom-marker",
+    className: "custom-marker-with-label",
     html: `
-      <div style="
-        background: ${bgColor};
-        width: ${size}px;
-        height: ${size}px;
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <svg width="${size * 0.5}" height="${size * 0.5}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-          <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
-        </svg>
+      <div style="display: flex; flex-direction: column; align-items: center; position: relative;">
+        <div style="
+          background: ${bgColor};
+          width: ${size}px;
+          height: ${size}px;
+          border-radius: 50%;
+          border: 3px solid white;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        ">
+          <svg width="${size * 0.5}" height="${size * 0.5}" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+            <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
+          </svg>
+        </div>
+        <div style="
+          background: rgba(0, 0, 0, 0.75);
+          color: white;
+          font-size: 10px;
+          font-weight: 500;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-top: 4px;
+          white-space: nowrap;
+          max-width: 150px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+        ">${displayName}</div>
       </div>
     `,
-    iconSize: [size, size],
-    iconAnchor: [size / 2, size / 2],
+    iconSize: [150, size + 24],
+    iconAnchor: [75, size / 2],
     popupAnchor: [0, -size / 2],
   });
 };
@@ -178,7 +197,7 @@ export function HealthcareMap({ markers, onMarkerClick, selectedRegion, classNam
             <Marker
               key={marker.id}
               position={[marker.lat, marker.lng]}
-              icon={createMarkerIcon(marker.status, marker.type)}
+              icon={createMarkerIcon(marker.status, marker.type, marker.name)}
               eventHandlers={{
                 click: () => onMarkerClick?.(marker),
               }}
