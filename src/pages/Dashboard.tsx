@@ -18,6 +18,13 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
+interface Citation {
+  id: string;
+  name: string;
+  region: string | null;
+  specialties: string | null;
+}
+
 const Dashboard = () => {
   const { facilities, loading, stats, regionStats } = useFacilities();
   const [response, setResponse] = useState<string | null>(null);
@@ -26,6 +33,10 @@ const Dashboard = () => {
   const [isVoiceResponse, setIsVoiceResponse] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<"chat" | "voice" | null>(null);
+  const [citations, setCitations] = useState<Citation[]>([]);
+  const [anomaliesDetected, setAnomaliesDetected] = useState(0);
+  const [coldSpots, setColdSpots] = useState<string[]>([]);
+  const [regionalSummary, setRegionalSummary] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const handleChatSubmit = async (question: string) => {
@@ -34,6 +45,10 @@ const Dashboard = () => {
     setResponse(null);
     setAudioBase64(null);
     setIsVoiceResponse(false);
+    setCitations([]);
+    setAnomaliesDetected(0);
+    setColdSpots([]);
+    setRegionalSummary({});
 
     try {
       const res = await fetch(
@@ -56,6 +71,10 @@ const Dashboard = () => {
 
       setResponse(data.answer);
       setFacilitiesAnalyzed(data.facilities_analyzed || 0);
+      setCitations(data.citations || []);
+      setAnomaliesDetected(data.anomalies_detected || 0);
+      setColdSpots(data.cold_spots || []);
+      setRegionalSummary(data.regional_summary || {});
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -207,6 +226,10 @@ const Dashboard = () => {
                     audioBase64={audioBase64}
                     facilitiesAnalyzed={facilitiesAnalyzed}
                     isVoiceResponse={isVoiceResponse}
+                    citations={citations}
+                    anomaliesDetected={anomaliesDetected}
+                    coldSpots={coldSpots}
+                    regionalSummary={regionalSummary}
                   />
                 )}
               </div>

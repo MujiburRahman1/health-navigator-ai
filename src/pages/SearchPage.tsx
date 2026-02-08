@@ -11,6 +11,13 @@ import { Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { Facility } from "@/types/healthcare";
 
+interface Citation {
+  id: string;
+  name: string;
+  region: string | null;
+  specialties: string | null;
+}
+
 const SearchPage = () => {
   const { facilities, loading, stats } = useFacilities();
   const {
@@ -26,6 +33,10 @@ const SearchPage = () => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [aiResponse, setAiResponse] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [citations, setCitations] = useState<Citation[]>([]);
+  const [anomaliesDetected, setAnomaliesDetected] = useState(0);
+  const [coldSpots, setColdSpots] = useState<string[]>([]);
+  const [regionalSummary, setRegionalSummary] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const handleAISearch = async (query: string) => {
@@ -33,6 +44,10 @@ const SearchPage = () => {
     
     setIsAiLoading(true);
     setAiResponse(null);
+    setCitations([]);
+    setAnomaliesDetected(0);
+    setColdSpots([]);
+    setRegionalSummary({});
     
     try {
       const res = await fetch(
@@ -54,6 +69,10 @@ const SearchPage = () => {
       }
 
       setAiResponse(data.answer);
+      setCitations(data.citations || []);
+      setAnomaliesDetected(data.anomalies_detected || 0);
+      setColdSpots(data.cold_spots || []);
+      setRegionalSummary(data.regional_summary || {});
     } catch (error) {
       toast({
         title: "AI Search Error",
@@ -85,10 +104,10 @@ const SearchPage = () => {
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-2xl font-bold text-foreground">
-            Search & Query
+            VF Agent Search & Query
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Natural language search and advanced filtering
+            Intelligent healthcare analysis with row-level citations and anomaly detection
           </p>
         </div>
 
@@ -102,13 +121,18 @@ const SearchPage = () => {
           onAISearch={handleAISearch}
         />
 
-        {/* AI Response */}
+        {/* AI Response with full intelligence features */}
         {isAiLoading && (
           <Card className="p-8">
             <div className="flex flex-col items-center justify-center gap-4">
-              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              <div className="relative">
+                <div className="h-16 w-16 rounded-full bg-gradient-hero opacity-20 animate-ping" />
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="h-12 w-12 rounded-full bg-gradient-hero animate-pulse" />
+                </div>
+              </div>
               <p className="text-sm text-muted-foreground">
-                AI is analyzing your query...
+                VF Agent analyzing healthcare data with anomaly detection...
               </p>
             </div>
           </Card>
@@ -120,6 +144,10 @@ const SearchPage = () => {
             audioBase64={null}
             facilitiesAnalyzed={filteredFacilities.length}
             isVoiceResponse={false}
+            citations={citations}
+            anomaliesDetected={anomaliesDetected}
+            coldSpots={coldSpots}
+            regionalSummary={regionalSummary}
           />
         )}
 
