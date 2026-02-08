@@ -89,10 +89,13 @@ export function ResponseDisplay({
   // Clean markdown formatting from response
   const cleanResponse = (text: string): string => {
     return text
-      .replace(/###\s*/g, "")  // Remove ### headers
-      .replace(/\*\*\*/g, "")   // Remove *** bold/italic
-      .replace(/\*\*/g, "")     // Remove ** bold
-      .replace(/\n\s*\n/g, "\n\n") // Normalize multiple newlines
+      .replace(/#{1,6}\s*/g, "")     // Remove # headers (any level)
+      .replace(/\*\*\*/g, "")         // Remove *** bold/italic
+      .replace(/\*\*/g, "")           // Remove ** bold
+      .replace(/\*([^*]+)\*/g, "$1")  // Remove *text* italics but keep text
+      .replace(/^\s*\*\s+/gm, "• ")   // Convert * bullet points to •
+      .replace(/---+/g, "")           // Remove horizontal rules
+      .replace(/\n\s*\n\s*\n/g, "\n\n") // Normalize multiple newlines
       .trim();
   };
 
