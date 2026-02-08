@@ -1,73 +1,160 @@
-# Welcome to your Lovable project
+# 🏥 Bridging Medical Deserts
 
-## Project info
+An AI-powered healthcare infrastructure analytics platform designed for NGO planners and policymakers to identify regional healthcare gaps, detect anomalies, and optimize resource allocation.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## 🎯 Project Vision
 
-## How can I edit this code?
+This platform unlocks medical knowledge trapped in unstructured documents to match patients with care globally, helping close healthcare access gaps and potentially extending quality care to billions currently underserved.
 
-There are several ways of editing your application.
+## ✨ Key Features
 
-**Use Lovable**
+### 📊 Dashboard Overview
+- Real-time healthcare infrastructure statistics
+- System alerts for medical deserts and suspicious claims
+- Regional coverage analysis with coverage scores
+- AI-powered healthcare assistant with natural language queries
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🗺️ Interactive Map
+- Leaflet-based geographic visualization of healthcare facilities
+- Status-coded markers (Operational, Limited, Suspicious, Incomplete)
+- Facility name labels with toggle visibility
+- Region filtering via URL parameters
+- Medical desert zone indicators
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🔍 Smart Search
+- 59 specialized VF Agent queries across 11 categories
+- MoSCoW-prioritized query library (Geospatial, Anomaly, Workforce, etc.)
+- Interactive facility citations with [FAC-xxx] tags
+- Cold spot detection linking to filtered map views
 
-**Use your preferred IDE**
+### 📈 Analytics
+- Recharts-based statistical visualizations
+- Regional distribution analysis
+- Equipment and specialty gap identification
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### 🧠 AI Intelligence Features
+- **Anomaly Detection**: Identifies equipment mismatches (e.g., surgical claims without proper equipment)
+- **Geospatial Analysis**: Haversine distance calculations for healthcare cold spots
+- **Transparency Citations**: Row-level citations with slide-out facility detail panels
+- **Multi-Agent Architecture**: Supervisor Agent, Genie Chat (text-to-SQL), and Medical Reasoning Agent
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 🛠️ Tech Stack
 
-Follow these steps:
+| Layer | Technology |
+|-------|------------|
+| Frontend | React 18, TypeScript, Vite |
+| Styling | Tailwind CSS, shadcn/ui, Radix UI |
+| Maps | Leaflet, react-leaflet v4.2.1 |
+| Charts | Recharts |
+| Backend | Supabase (PostgreSQL, Edge Functions) |
+| AI | Lovable AI (Gemini, GPT models) |
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── dashboard/      # StatCard, AlertsList, RegionOverview
+│   ├── facilities/     # FacilitiesList, FacilityDetail
+│   ├── map/            # HealthcareMap with Leaflet
+│   ├── search/         # SearchPanel with VF Agent queries
+│   ├── analytics/      # AnalyticsCharts
+│   └── ui/             # shadcn/ui components
+├── hooks/
+│   ├── useFacilities.ts    # Facility data & statistics
+│   └── useSearch.ts        # Search functionality
+├── lib/
+│   ├── anomalyDetection.ts # Equipment mismatch detection
+│   ├── geospatialUtils.ts  # Distance calculations
+│   └── vfAgentQuestions.ts # 59-question query framework
+├── pages/
+│   ├── Dashboard.tsx       # Main dashboard
+│   ├── MapPage.tsx         # Interactive map
+│   ├── SearchPage.tsx      # AI search interface
+│   ├── AnalyticsPage.tsx   # Visual analytics
+│   └── FacilitiesPage.tsx  # Facility browser
+└── types/
+    └── healthcare.ts       # TypeScript interfaces
+
+supabase/
+└── functions/
+    ├── healthcare-chat/    # AI chat endpoint
+    ├── healthcare-voice/   # Voice response endpoint
+    └── upload-dataset/     # Data ingestion
+```
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ (install via [nvm](https://github.com/nvm-sh/nvm))
+- npm or bun
+
+### Installation
+
+```bash
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
+# Navigate to project directory
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Environment Variables
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+The project uses Lovable Cloud (Supabase) with auto-configured environment variables:
+- `VITE_SUPABASE_URL`
+- `VITE_SUPABASE_PUBLISHABLE_KEY`
+- `VITE_SUPABASE_PROJECT_ID`
 
-**Use GitHub Codespaces**
+## 📊 Database Schema
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+### `healthcare_facilities`
+| Column | Type | Description |
+|--------|------|-------------|
+| id | UUID | Primary key |
+| name | TEXT | Facility name |
+| region | TEXT | Geographic region |
+| specialties | TEXT | Medical specialties |
+| procedures | TEXT | Available procedures |
+| equipment | TEXT | Medical equipment |
+| capability | TEXT | Facility capabilities |
+| phone | TEXT | Contact phone |
+| website | TEXT | Website URL |
+| source_url | TEXT | Data source reference |
 
-## What technologies are used for this project?
+## 🔐 Security
 
-This project is built with:
+- Row-Level Security (RLS) enabled on all tables
+- Public read access for facility data
+- Secure edge functions with proper authorization
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎨 Design Philosophy
 
-## How can I deploy this project?
+- **Clean & Minimalist**: Medical-themed, professional interface
+- **Mobile-First**: Responsive design optimized for field workers
+- **Demo-Friendly**: Intuitive for non-technical NGO planners
+- **Accessibility**: High contrast, clear typography
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+## 📱 Responsive Breakpoints
 
-## Can I connect a custom domain to my Lovable project?
+- Mobile: < 640px
+- Tablet: 640px - 1024px
+- Desktop: > 1024px
 
-Yes, you can!
+## 🤝 Contributing
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+This project is built with [Lovable](https://lovable.dev). Changes made via Lovable are automatically committed.
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+## 📄 License
+
+MIT License - See LICENSE file for details.
+
+---
+
+**Built with ❤️ for bridging healthcare gaps worldwide**
