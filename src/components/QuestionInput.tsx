@@ -12,10 +12,12 @@ interface QuestionInputProps {
 }
 
 const EXAMPLE_PROMPTS = [
-  "What regions have the least access to cardiac care?",
-  "Which facilities claim surgical capabilities but lack operating rooms?",
-  "Identify any suspicious patterns in the equipment claims",
-  "What specialties are underrepresented in rural areas?",
+  "How many hospitals have cardiology?",
+  "Which facilities claim to offer cardiac surgery but lack basic equipment?",
+  "Where are the largest geographic cold spots where cardiac care is absent?",
+  "Which facilities have unrealistic procedure claims relative to their size?",
+  "Which regions have specialists but unclear information about where they practice?",
+  "In each region, which procedures depend on very few facilities?",
 ];
 
 export function QuestionInput({
