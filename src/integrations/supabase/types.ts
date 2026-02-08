@@ -14,7 +14,51 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      healthcare_facilities: {
+        Row: {
+          capability: string | null
+          created_at: string
+          equipment: string | null
+          id: string
+          name: string
+          phone: string | null
+          procedures: string | null
+          region: string | null
+          source_url: string | null
+          specialties: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          capability?: string | null
+          created_at?: string
+          equipment?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          procedures?: string | null
+          region?: string | null
+          source_url?: string | null
+          specialties?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          capability?: string | null
+          created_at?: string
+          equipment?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          procedures?: string | null
+          region?: string | null
+          source_url?: string | null
+          specialties?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
