@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { Search, Filter, X, Sparkles, ChevronRight } from "lucide-react";
+import { Search, Filter, X, Sparkles, Brain, MapPin, AlertTriangle, Users, Building2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -13,6 +14,60 @@ import {
 } from "@/components/ui/select";
 import type { SearchFilters } from "@/types/healthcare";
 import { cn } from "@/lib/utils";
+
+// VF Agent example queries organized by category
+const VF_AGENT_CATEGORIES = [
+  {
+    id: "basic",
+    label: "Basic",
+    icon: Building2,
+    queries: [
+      "How many hospitals have cardiology?",
+      "What services does Korle Bu Teaching Hospital offer?",
+      "Which region has the most teaching hospitals?",
+    ],
+  },
+  {
+    id: "geospatial",
+    label: "Geospatial",
+    icon: MapPin,
+    queries: [
+      "Where are the largest geographic cold spots where cardiac care is absent?",
+      "What areas have known disease prevalence but no facilities treating it?",
+      "What is the service gap between urban and rural areas for emergency care?",
+    ],
+  },
+  {
+    id: "anomaly",
+    label: "Anomaly",
+    icon: AlertTriangle,
+    queries: [
+      "Which facilities claim surgical capabilities but lack basic equipment?",
+      "Which facilities have unrealistic procedure claims relative to their size?",
+      "Where do we see things that shouldn't move together?",
+    ],
+  },
+  {
+    id: "workforce",
+    label: "Workforce",
+    icon: Users,
+    queries: [
+      "Which regions have specialists but unclear information about where they practice?",
+      "How many facilities have evidence of visiting specialists vs permanent staff?",
+      "Where do signals indicate services are tied to individuals rather than institutions?",
+    ],
+  },
+  {
+    id: "resources",
+    label: "Resources",
+    icon: Brain,
+    queries: [
+      "In each region, which procedures depend on very few facilities?",
+      "Where is there oversupply concentration vs scarcity of high-complexity procedures?",
+      "What is the problem type by region: lack of equipment, training, or practitioners?",
+    ],
+  },
+];
 
 interface SearchPanelProps {
   filters: SearchFilters;
@@ -39,6 +94,7 @@ export function SearchPanel({
   onAISearch,
 }: SearchPanelProps) {
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeCategory, setActiveCategory] = useState("basic");
 
   const hasActiveFilters =
     filters.query ||
@@ -52,6 +108,13 @@ export function SearchPanel({
     setShowSuggestions(false);
   };
 
+  const handleExampleClick = (query: string) => {
+    onUpdateFilters({ query });
+    if (onAISearch) {
+      onAISearch(query);
+    }
+  };
+
   return (
     <Card className="p-4">
       {/* Search input with AI button */}
@@ -63,7 +126,7 @@ export function SearchPanel({
             onChange={(e) => onUpdateFilters({ query: e.target.value })}
             onFocus={() => setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            placeholder="Search facilities, procedures, or ask a question..."
+            placeholder="Ask VF Agent about healthcare facilities, gaps, or anomalies..."
             className="pl-10 pr-4"
           />
 
@@ -95,10 +158,46 @@ export function SearchPanel({
             disabled={!filters.query}
             className="bg-gradient-hero"
           >
-            <Sparkles className="h-4 w-4 mr-2" />
-            AI Search
+            <Brain className="h-4 w-4 mr-2" />
+            VF Agent
           </Button>
         )}
+      </div>
+
+      {/* VF Agent Categories */}
+      <div className="mb-4">
+        <p className="text-xs text-muted-foreground font-medium mb-2">
+          VF Agent Query Categories (59 questions across 11 categories)
+        </p>
+        <Tabs value={activeCategory} onValueChange={setActiveCategory}>
+          <TabsList className="h-auto flex-wrap justify-start gap-1 bg-transparent p-0">
+            {VF_AGENT_CATEGORIES.map((cat) => (
+              <TabsTrigger
+                key={cat.id}
+                value={cat.id}
+                className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground text-xs px-3 py-1.5 h-auto"
+              >
+                <cat.icon className="h-3 w-3 mr-1.5" />
+                {cat.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {VF_AGENT_CATEGORIES.map((cat) => (
+            <TabsContent key={cat.id} value={cat.id} className="mt-2">
+              <div className="flex flex-wrap gap-2">
+                {cat.queries.map((query, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleExampleClick(query)}
+                    className="text-xs px-3 py-1.5 rounded-full bg-muted hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors text-left"
+                  >
+                    {query}
+                  </button>
+                ))}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
       </div>
 
       {/* Filter row */}
