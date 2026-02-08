@@ -5,6 +5,13 @@ import { QuestionInput } from "@/components/QuestionInput";
 import { ResponseDisplay } from "@/components/ResponseDisplay";
 import { useToast } from "@/hooks/use-toast";
 
+interface Citation {
+  id: string;
+  name: string;
+  region: string | null;
+  specialties: string | null;
+}
+
 const Index = () => {
   const [facilitiesCount, setFacilitiesCount] = useState(0);
   const [response, setResponse] = useState<string | null>(null);
@@ -13,6 +20,10 @@ const Index = () => {
   const [isVoiceResponse, setIsVoiceResponse] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingType, setLoadingType] = useState<"chat" | "voice" | null>(null);
+  const [citations, setCitations] = useState<Citation[]>([]);
+  const [anomaliesDetected, setAnomaliesDetected] = useState(0);
+  const [coldSpots, setColdSpots] = useState<string[]>([]);
+  const [regionalSummary, setRegionalSummary] = useState<Record<string, number>>({});
   const { toast } = useToast();
 
   const handleUploadComplete = (count: number) => {
@@ -25,6 +36,10 @@ const Index = () => {
     setResponse(null);
     setAudioBase64(null);
     setIsVoiceResponse(false);
+    setCitations([]);
+    setAnomaliesDetected(0);
+    setColdSpots([]);
+    setRegionalSummary({});
 
     try {
       const res = await fetch(
@@ -47,6 +62,10 @@ const Index = () => {
 
       setResponse(data.answer);
       setFacilitiesAnalyzed(data.facilities_analyzed || 0);
+      setCitations(data.citations || []);
+      setAnomaliesDetected(data.anomalies_detected || 0);
+      setColdSpots(data.cold_spots || []);
+      setRegionalSummary(data.regional_summary || {});
     } catch (error) {
       console.error("Chat error:", error);
       toast({
@@ -66,6 +85,10 @@ const Index = () => {
     setResponse(null);
     setAudioBase64(null);
     setIsVoiceResponse(true);
+    setCitations([]);
+    setAnomaliesDetected(0);
+    setColdSpots([]);
+    setRegionalSummary({});
 
     try {
       const res = await fetch(
@@ -150,7 +173,7 @@ const Index = () => {
                 <span className="flex items-center justify-center h-6 w-6 rounded-full bg-primary/10 text-primary text-xs font-bold">
                   3
                 </span>
-                AI Response
+                VF Agent Response
               </h2>
               {isLoading ? (
                 <div className="flex flex-col items-center justify-center py-16 gap-4">
@@ -163,7 +186,7 @@ const Index = () => {
                   <p className="text-sm text-muted-foreground">
                     {loadingType === "voice" 
                       ? "Analyzing data and generating voice response..." 
-                      : "Analyzing healthcare data..."}
+                      : "Analyzing healthcare data with VF Agent..."}
                   </p>
                 </div>
               ) : (
@@ -172,6 +195,10 @@ const Index = () => {
                   audioBase64={audioBase64}
                   facilitiesAnalyzed={facilitiesAnalyzed}
                   isVoiceResponse={isVoiceResponse}
+                  citations={citations}
+                  anomaliesDetected={anomaliesDetected}
+                  coldSpots={coldSpots}
+                  regionalSummary={regionalSummary}
                 />
               )}
             </section>
@@ -180,9 +207,9 @@ const Index = () => {
 
         {/* Footer */}
         <footer className="mt-16 text-center text-sm text-muted-foreground px-4">
-          <p>Built for healthcare equity and explainable AI</p>
+          <p>Bridging Medical Deserts • Virtue Foundation</p>
           <p className="mt-1 text-xs">
-            Powered by Lovable AI • ElevenLabs Voice
+            VF Agent powered by Lovable AI • ElevenLabs Voice
           </p>
         </footer>
       </div>

@@ -1,8 +1,10 @@
 import { useState } from "react";
-import { MessageSquare, Volume2, Loader2 } from "lucide-react";
+import { MessageSquare, Volume2, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { VF_QUESTION_CATEGORIES, getFeaturedPrompts } from "@/lib/vfAgentQuestions";
 
 interface QuestionInputProps {
   onChatSubmit: (question: string) => void;
@@ -11,15 +13,6 @@ interface QuestionInputProps {
   loadingType: "chat" | "voice" | null;
 }
 
-const EXAMPLE_PROMPTS = [
-  "How many hospitals have cardiology?",
-  "Which facilities claim to offer cardiac surgery but lack basic equipment?",
-  "Where are the largest geographic cold spots where cardiac care is absent?",
-  "Which facilities have unrealistic procedure claims relative to their size?",
-  "Which regions have specialists but unclear information about where they practice?",
-  "In each region, which procedures depend on very few facilities?",
-];
-
 export function QuestionInput({
   onChatSubmit,
   onVoiceSubmit,
@@ -27,6 +20,10 @@ export function QuestionInput({
   loadingType,
 }: QuestionInputProps) {
   const [question, setQuestion] = useState("");
+  const [showAllCategories, setShowAllCategories] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const featuredPrompts = getFeaturedPrompts();
 
   const handleChatClick = () => {
     if (question.trim()) {
@@ -44,6 +41,10 @@ export function QuestionInput({
     setQuestion(prompt);
   };
 
+  const displayedCategory = selectedCategory 
+    ? VF_QUESTION_CATEGORIES.find(c => c.id === selectedCategory)
+    : null;
+
   return (
     <Card className="p-6 space-y-4">
       <div>
@@ -59,21 +60,97 @@ export function QuestionInput({
         />
       </div>
 
-      {/* Example prompts */}
+      {/* Featured prompts */}
       <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">Try an example:</p>
-        <div className="flex flex-wrap gap-2">
-          {EXAMPLE_PROMPTS.map((prompt, idx) => (
-            <button
-              key={idx}
-              onClick={() => handleExampleClick(prompt)}
-              disabled={isLoading}
-              className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50"
-            >
-              {prompt.slice(0, 40)}...
-            </button>
-          ))}
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-muted-foreground">Featured questions:</p>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowAllCategories(!showAllCategories)}
+            className="text-xs h-6 px-2"
+          >
+            {showAllCategories ? (
+              <>Hide categories <ChevronUp className="h-3 w-3 ml-1" /></>
+            ) : (
+              <>Show all 11 categories <ChevronDown className="h-3 w-3 ml-1" /></>
+            )}
+          </Button>
         </div>
+        
+        {!showAllCategories && (
+          <div className="flex flex-wrap gap-2">
+            {featuredPrompts.slice(0, 6).map((prompt, idx) => (
+              <button
+                key={idx}
+                onClick={() => handleExampleClick(prompt)}
+                disabled={isLoading}
+                className="text-xs px-3 py-1.5 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors disabled:opacity-50 text-left"
+              >
+                {prompt.length > 50 ? prompt.slice(0, 50) + '...' : prompt}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* All categories view */}
+        {showAllCategories && (
+          <div className="space-y-3 pt-2">
+            {/* Category tabs */}
+            <div className="flex flex-wrap gap-1.5">
+              {VF_QUESTION_CATEGORIES.map((category) => (
+                <Badge
+                  key={category.id}
+                  variant={selectedCategory === category.id ? "default" : "secondary"}
+                  className="cursor-pointer text-xs"
+                  onClick={() => setSelectedCategory(
+                    selectedCategory === category.id ? null : category.id
+                  )}
+                >
+                  {category.icon} {category.name}
+                  <span className="ml-1 opacity-60">({category.questions.length})</span>
+                </Badge>
+              ))}
+            </div>
+
+            {/* Questions for selected category */}
+            {displayedCategory && (
+              <div className="bg-muted/50 rounded-lg p-3 space-y-2">
+                <p className="text-xs font-medium text-foreground">
+                  {displayedCategory.icon} {displayedCategory.name} Questions
+                </p>
+                <div className="space-y-1.5">
+                  {displayedCategory.questions.map((q) => (
+                    <button
+                      key={q.id}
+                      onClick={() => handleExampleClick(q.question)}
+                      disabled={isLoading}
+                      className="w-full text-left text-xs px-3 py-2 rounded bg-background hover:bg-primary/5 transition-colors disabled:opacity-50 flex items-start gap-2"
+                    >
+                      <Badge 
+                        variant="outline" 
+                        className={`text-[10px] shrink-0 ${
+                          q.priority === 'must' ? 'border-success text-success' :
+                          q.priority === 'should' ? 'border-primary text-primary' :
+                          'border-muted-foreground text-muted-foreground'
+                        }`}
+                      >
+                        {q.priority}
+                      </Badge>
+                      <span>{q.question}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {!displayedCategory && (
+              <p className="text-xs text-muted-foreground text-center py-2">
+                Click a category above to see available questions
+              </p>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Action buttons */}
