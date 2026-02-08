@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Filter, Layers, ZoomIn, ZoomOut, Locate } from "lucide-react";
+import { Building2, Filter, Layers, ZoomIn, ZoomOut, Locate, Tag, Tags } from "lucide-react";
 import type { MapMarker } from "@/types/healthcare";
 import "leaflet/dist/leaflet.css";
 
@@ -16,8 +16,8 @@ interface HealthcareMapProps {
   className?: string;
 }
 
-// Create custom marker icons with name labels
-const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"], name: string) => {
+// Create custom marker icons with optional name labels
+const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"], name: string, showLabel: boolean) => {
   const colors = {
     operational: "#22c55e",
     limited: "#f59e0b",
@@ -30,6 +30,23 @@ const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"], 
   
   // Truncate name for display
   const displayName = name.length > 20 ? name.substring(0, 18) + "..." : name;
+
+  const labelHtml = showLabel ? `
+    <div style="
+      background: rgba(0, 0, 0, 0.75);
+      color: white;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 4px;
+      white-space: nowrap;
+      max-width: 150px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    ">${displayName}</div>
+  ` : '';
 
   return new DivIcon({
     className: "custom-marker-with-label",
@@ -50,23 +67,10 @@ const createMarkerIcon = (status: MapMarker["status"], type: MapMarker["type"], 
             <path d="M3 21h18M9 8h1M9 12h1M9 16h1M14 8h1M14 12h1M14 16h1M5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16"/>
           </svg>
         </div>
-        <div style="
-          background: rgba(0, 0, 0, 0.75);
-          color: white;
-          font-size: 10px;
-          font-weight: 500;
-          padding: 2px 6px;
-          border-radius: 4px;
-          margin-top: 4px;
-          white-space: nowrap;
-          max-width: 150px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          box-shadow: 0 1px 4px rgba(0,0,0,0.2);
-        ">${displayName}</div>
+        ${labelHtml}
       </div>
     `,
-    iconSize: [150, size + 24],
+    iconSize: [150, size + (showLabel ? 24 : 0)],
     iconAnchor: [75, size / 2],
     popupAnchor: [0, -size / 2],
   });
@@ -126,6 +130,7 @@ function MapControls() {
 export function HealthcareMap({ markers, onMarkerClick, selectedRegion, className }: HealthcareMapProps) {
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [filterType, setFilterType] = useState<string>("all");
+  const [showLabels, setShowLabels] = useState(true);
 
   const filteredMarkers = markers.filter((marker) => {
     if (filterStatus !== "all" && marker.status !== filterStatus) return false;
@@ -170,6 +175,16 @@ export function HealthcareMap({ markers, onMarkerClick, selectedRegion, classNam
           </SelectContent>
         </Select>
 
+        <Button
+          variant={showLabels ? "default" : "outline"}
+          size="sm"
+          className="h-8 text-xs gap-1.5"
+          onClick={() => setShowLabels(!showLabels)}
+        >
+          {showLabels ? <Tags className="h-3.5 w-3.5" /> : <Tag className="h-3.5 w-3.5" />}
+          {showLabels ? "Labels On" : "Labels Off"}
+        </Button>
+
         <Badge variant="secondary" className="ml-auto">
           {filteredMarkers.length} facilities
         </Badge>
@@ -197,7 +212,7 @@ export function HealthcareMap({ markers, onMarkerClick, selectedRegion, classNam
             <Marker
               key={marker.id}
               position={[marker.lat, marker.lng]}
-              icon={createMarkerIcon(marker.status, marker.type, marker.name)}
+              icon={createMarkerIcon(marker.status, marker.type, marker.name, showLabels)}
               eventHandlers={{
                 click: () => onMarkerClick?.(marker),
               }}
