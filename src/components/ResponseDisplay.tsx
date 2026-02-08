@@ -242,10 +242,14 @@ export function ResponseDisplay({
                   </p>
                   <div className="flex flex-wrap gap-1">
                     {coldSpots.map((spot, idx) => (
-                      <Badge key={idx} variant="outline" className="text-xs border-destructive/50 text-destructive">
-                        <MapPin className="h-3 w-3 mr-1" />
+                      <a
+                        key={idx}
+                        href={`/map?region=${encodeURIComponent(spot)}`}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs border border-destructive/50 text-destructive bg-destructive/5 hover:bg-destructive/15 hover:border-destructive transition-colors cursor-pointer"
+                      >
+                        <MapPin className="h-3 w-3" />
                         {spot}
-                      </Badge>
+                      </a>
                     ))}
                   </div>
                 </div>
