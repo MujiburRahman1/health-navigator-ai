@@ -1,15 +1,29 @@
 import { useRef, useEffect, useState } from "react";
-import { Play, Pause, Volume2, VolumeX, Bot, FileText, MapPin, AlertTriangle, ChevronDown, ChevronUp } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Bot, FileText, MapPin, AlertTriangle, ChevronDown, ChevronUp, Building2, Phone, Globe, Stethoscope, Wrench, Scissors, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 interface Citation {
   id: string;
   name: string;
   region: string | null;
   specialties: string | null;
+  equipment?: string | null;
+  procedures?: string | null;
+  phone?: string | null;
+  website?: string | null;
+  source_url?: string | null;
+  capability?: string | null;
 }
 
 interface ResponseDisplayProps {
@@ -40,6 +54,8 @@ export function ResponseDisplay({
   const [duration, setDuration] = useState(0);
   const [showCitations, setShowCitations] = useState(false);
   const [showInsights, setShowInsights] = useState(false);
+  const [selectedCitation, setSelectedCitation] = useState<Citation | null>(null);
+  const [isCitationDetailOpen, setIsCitationDetailOpen] = useState(false);
 
   useEffect(() => {
     if (audioBase64 && audioRef.current) {
@@ -302,29 +318,212 @@ export function ResponseDisplay({
           
           {showCitations && (
             <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
-              {citations.map((citation, idx) => (
-                <div
+              {citations.map((citation) => (
+                <button
                   key={citation.id}
-                  className="p-2 rounded bg-muted/30 text-xs"
+                  onClick={() => {
+                    setSelectedCitation(citation);
+                    setIsCitationDetailOpen(true);
+                  }}
+                  className="w-full p-3 rounded-lg bg-muted/30 hover:bg-primary/10 border border-transparent hover:border-primary/30 transition-all text-left cursor-pointer group"
                 >
                   <div className="flex items-start gap-2">
-                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                    <Badge variant="outline" className="shrink-0 text-[10px] group-hover:border-primary group-hover:text-primary">
                       FAC-{citation.id.slice(0, 8)}
                     </Badge>
-                    <div>
-                      <p className="font-medium text-foreground">{citation.name}</p>
-                      <p className="text-muted-foreground">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">
+                        {citation.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground truncate">
                         {citation.region || 'Unknown region'}
-                        {citation.specialties && ` • ${citation.specialties.slice(0, 50)}${citation.specialties.length > 50 ? '...' : ''}`}
+                        {citation.specialties && ` • ${citation.specialties.slice(0, 40)}${citation.specialties.length > 40 ? '...' : ''}`}
                       </p>
                     </div>
+                    <ExternalLink className="h-4 w-4 text-muted-foreground group-hover:text-primary shrink-0" />
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           )}
         </div>
       )}
+
+      {/* Citation Detail Sheet */}
+      <Sheet open={isCitationDetailOpen} onOpenChange={setIsCitationDetailOpen}>
+        <SheetContent className="w-full sm:max-w-lg">
+          {selectedCitation && (
+            <>
+              <SheetHeader className="pb-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex items-center justify-center h-12 w-12 rounded-xl bg-primary/10">
+                    <Building2 className="h-6 w-6 text-primary" />
+                  </div>
+                  <div>
+                    <SheetTitle className="text-left">{selectedCitation.name}</SheetTitle>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {selectedCitation.region || "Unknown Region"}
+                    </p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="w-fit mt-2 text-xs">
+                  FAC-{selectedCitation.id.slice(0, 8)}
+                </Badge>
+              </SheetHeader>
+
+              <ScrollArea className="h-[calc(100vh-200px)] pr-4">
+                <div className="space-y-6">
+                  {/* Contact info */}
+                  <div className="space-y-3">
+                    <h4 className="font-medium text-sm text-foreground">Contact Information</h4>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-3 text-sm">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <span className="text-muted-foreground">
+                          {selectedCitation.region || "Location not specified"}
+                        </span>
+                      </div>
+                      {selectedCitation.phone && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-muted-foreground">{selectedCitation.phone}</span>
+                        </div>
+                      )}
+                      {selectedCitation.website && (
+                        <div className="flex items-center gap-3 text-sm">
+                          <Globe className="h-4 w-4 text-muted-foreground" />
+                          <a
+                            href={selectedCitation.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline flex items-center gap-1"
+                          >
+                            {selectedCitation.website}
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <Separator />
+
+                  {/* Specialties */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Stethoscope className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="font-medium text-sm text-foreground">Specialties</h4>
+                    </div>
+                    {selectedCitation.specialties ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCitation.specialties.split(",").map((s, idx) => (
+                          <Badge key={idx} variant="secondary" className="text-xs">
+                            {s.trim()}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        No specialties listed
+                      </p>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Procedures */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Scissors className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="font-medium text-sm text-foreground">Procedures</h4>
+                    </div>
+                    {selectedCitation.procedures ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCitation.procedures.split(",").map((p, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {p.trim()}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        No procedures listed
+                      </p>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Equipment */}
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-2">
+                      <Wrench className="h-4 w-4 text-muted-foreground" />
+                      <h4 className="font-medium text-sm text-foreground">Equipment</h4>
+                      {(!selectedCitation.equipment || selectedCitation.equipment === "None") && (
+                        <Badge variant="destructive" className="text-xs">Missing</Badge>
+                      )}
+                    </div>
+                    {selectedCitation.equipment && selectedCitation.equipment !== "None" ? (
+                      <div className="flex flex-wrap gap-2">
+                        {selectedCitation.equipment.split(",").map((eq, idx) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {eq.trim()}
+                          </Badge>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-muted-foreground italic">
+                        No equipment reported
+                      </p>
+                    )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Capability */}
+                  {selectedCitation.capability && (
+                    <>
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-sm text-foreground">Capability</h4>
+                        <p className="text-sm text-muted-foreground">
+                          {selectedCitation.capability}
+                        </p>
+                      </div>
+                      <Separator />
+                    </>
+                  )}
+
+                  {/* Data source */}
+                  {selectedCitation.source_url && (
+                    <div className="space-y-3">
+                      <h4 className="font-medium text-sm text-foreground">Data Source</h4>
+                      <Card className="bg-muted/50">
+                        <div className="p-3">
+                          <a
+                            href={selectedCitation.source_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-primary hover:underline flex items-center gap-1"
+                          >
+                            <FileText className="h-3 w-3" />
+                            View original document
+                            <ExternalLink className="h-3 w-3" />
+                          </a>
+                        </div>
+                      </Card>
+                    </div>
+                  )}
+
+                  {/* ID Reference */}
+                  <div className="text-xs text-muted-foreground">
+                    <p>Citation ID: {selectedCitation.id}</p>
+                  </div>
+                </div>
+              </ScrollArea>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </Card>
   );
 }

@@ -298,7 +298,7 @@ serve(async (req) => {
     const citedFacilityIds = [...answer.matchAll(/\[FAC-([a-f0-9]{8})\]/gi)]
       .map(m => m[1]);
     
-    // Get cited facilities details
+    // Get cited facilities with FULL details
     const citedFacilities = facilities?.filter(f => 
       citedFacilityIds.some(id => f.id.startsWith(id))
     ).map(f => ({
@@ -306,6 +306,12 @@ serve(async (req) => {
       name: f.name,
       region: f.region,
       specialties: f.specialties,
+      equipment: f.equipment,
+      procedures: f.procedures,
+      phone: f.phone,
+      website: f.website,
+      source_url: f.source_url,
+      capability: f.capability,
     })) || [];
 
     return new Response(
